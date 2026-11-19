@@ -1,17 +1,4 @@
-"""Heart disease (stroke) risk prediction with classical machine-learning models.
-
-Trains and compares six classifiers (Logistic Regression, Decision Tree,
-Random Forest, SVM, Naive Bayes, k-NN) on a tabular health dataset
-(Framingham-style columns), reports several metrics and saves plots,
-a results table and the best model to ``outputs/``.
-
-Usage
------
-    python src/heart_disease_prediction.py --data data/heart_disease.csv
-"""
-
 from __future__ import annotations
-
 import argparse
 import re
 import sys
@@ -20,7 +7,7 @@ from pathlib import Path
 import joblib
 import matplotlib
 
-matplotlib.use("Agg")  # headless-safe: figures are saved, not shown
+matplotlib.use("Agg")  
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -52,9 +39,6 @@ CONTINUOUS_FEATURES = [
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-# --------------------------------------------------------------------------- #
-# Data loading & preprocessing
-# --------------------------------------------------------------------------- #
 def load_data(path: Path) -> pd.DataFrame:
     """Read the CSV and normalise column names (e.g. ``'Heart_ stroke'`` -> ``'Heart_stroke'``)."""
     if not path.exists():
@@ -96,9 +80,6 @@ def prepare_data(df: pd.DataFrame, test_size: float):
     )
 
 
-# --------------------------------------------------------------------------- #
-# Models
-# --------------------------------------------------------------------------- #
 def build_models() -> dict[str, Pipeline]:
     """Each model sits in a pipeline: median imputation -> min-max scaling -> classifier."""
     classifiers = {
@@ -125,7 +106,6 @@ def build_models() -> dict[str, Pipeline]:
 def evaluate(model: Pipeline, X_test, y_test) -> dict[str, float]:
     """Accuracy, precision, recall, F1 and ROC-AUC on the held-out test set."""
     pred = model.predict(X_test)
-    # ROC-AUC needs a continuous score: probabilities where available (SVC exposes a margin instead)
     score = (model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba")
              else model.decision_function(X_test))
     return {
@@ -137,9 +117,7 @@ def evaluate(model: Pipeline, X_test, y_test) -> dict[str, float]:
     }
 
 
-# --------------------------------------------------------------------------- #
-# Plots
-# --------------------------------------------------------------------------- #
+
 def plot_feature_distributions(df: pd.DataFrame, out_dir: Path) -> None:
     cols = [c for c in CONTINUOUS_FEATURES if c in df.columns]
     fig, axes = plt.subplots(2, 4, figsize=(16, 7))
@@ -176,9 +154,6 @@ def plot_comparison(results: pd.DataFrame, out_dir: Path) -> None:
     plt.close()
 
 
-# --------------------------------------------------------------------------- #
-# Main
-# --------------------------------------------------------------------------- #
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data", type=Path, default=PROJECT_ROOT / "data" / "heart_disease.csv")
